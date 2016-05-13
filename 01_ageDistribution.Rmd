@@ -1,0 +1,114 @@
+---
+title: "01_ageDistribution"
+author: "Duc-Quang Nguyen"
+date: "3 May 2016"
+output: html_document
+---
+
+
+
+# Basic animated age distribution
+```{r setup, include=FALSE}
+preProcesssPxExtract <- FALSE
+
+library(magrittr)
+library(dplyr)
+library(tidyr)
+library(swiTheme)
+library(animation)
+```
+
+## Load data
+```{r dataload}
+if(preProcesssPxExtract) {
+  data.read <- read.csv("input/contenate_allData.csv", stringsAsFactors = F, check.names = F)
+  rownames(data.read) <- data.read$Age
+  data.read %<>% select(-Age)
+  
+  d2.read <- read.table("data/px-x-0102010000_101_2013_2014.csv", 
+    sep = "\t", stringsAsFactors = F , header = T, check.names = F, encoding = "latin1")
+  # rehsape! 
+  d2.read <- d2.read %>% select(-`Canton (-) / District (>>) / Commune (......)`, 
+    -`Type de population`, -`Sexe`, -`Nationalité`)
+  colnames(d2.read)[2:ncol(d2.read)] <- gsub(" an.*$", "", colnames(d2.read)[2:ncol(d2.read)]  )
+  d2 <- t(d2.read)[-1,]
+  colnames(d2) <- t(d2.read)[1,]
+
+  # sum age 99 & 100+
+  d2["99",] <-  d2["99",] + d2["100",]
+  d2 <- d2[rownames(d2) != "100",]
+  stopifnot(nrow(d2) == nrow(data.read))
+
+  rownames(d2) <- rownames(data.read)  
+  data <- cbind(data.read, d2)
+  write.csv(data, file = "input/concat_until2014.csv")
+} else {
+  data <- read.csv( "input/concat_until2014.csv", row.names = 1, check.names = F)
+}
+
+# convert to long
+data$age <- rownames(data)
+data <- data %>% gather("year", "n", -age)
+
+# add yearly sum and yearly proportion by age
+data %<>% group_by(year) %>% mutate (yearly = sum(n)) %>% ungroup()
+data$prop <- data$n / data$yearly
+```
+
+```{r plot}
+xlabel <- rep('', length(unique(data$age)))
+idx.x <- c(seq(1, length(unique(data$age)), 10), length(unique(data$age)))
+xlabel[idx.x] <- unique(data$age)[idx.x]
+
+descr <- paste0("proportion de la population suisse par âge (", 
+  paste(range(data$year), collapse ="-"), ")")
+title <- 'Vieillissement de la population'
+
+data$age <- factor(data$age)
+data$age <- reorder(data$age, as.numeric(gsub("\\+", "", data$age)))
+data$year <- as.numeric(data$year)
+
+y <- 2010
+font <- "Open Sans"
+title <- "Proportion de la population Suisse par âge"
+caption <- "Source: Office fédéral de la statistique | swissinfo.ch"
+
+plotayear <- function(data, y, title, caption) {
+  
+  plot <- ggplot(data = filter(data, year == y)) + 
+    geom_area(aes(as.numeric(age), prop), fill = "#663333" ) + 
+    scale_x_continuous(name = "age", 
+      breaks = c(seq(1, 100, 10), 100),
+      labels = levels(data$age)[c(seq(1, 100, 10), 100)],
+      expand = c(0.005, 0)) +
+    scale_y_continuous(name = "", limits = c(0, max(data$prop)), 
+      expand = c(0, 0), labels = scales::percent, breaks= scales::pretty_breaks( n = 4)) +
+    swi_theme() + theme(
+      panel.ontop = TRUE, 
+      panel.grid.major.y = element_line(colour = "white", linetype = 1),
+      plot.title = element_text(size = 30),
+      axis.text = element_text(size = 16)) + 
+    # the year in big
+    geom_text(data = data.frame(
+      x = nlevels(data$age)-5, 
+      y = max(data$prop) - 0.0035, label = as.character(y)),
+      aes(label = label, x = x, y = y), family = font, 
+      alpha = 0.3, size = 76,  color = "#d4c3aa", hjust = 1) +
+   labs(title=title, caption=caption) 
+  
+  print(plot)
+}
+
+saveGIF({
+	for(y in c(unique(data$year), rep(max(data$year), 5))) {
+		plotayear(data, y, title = title, caption = caption)
+	}
+}, movie.name = "populationAging.gif", interval = 0.2, ani.width = 640, ani.height = 770, loop = TRUE)
+
+
+
+
+
+
+
+```

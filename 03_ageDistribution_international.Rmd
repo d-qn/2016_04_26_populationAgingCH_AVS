@@ -1,0 +1,133 @@
+---
+title: "Life expectancy"
+author: "Duc-Quang Nguyen"
+date: "21 April 2016"
+output: html_document
+---
+
+## Data
+
+[US census bureau International Data Base (2015)](http://www.census.gov/data/developers/data-sets/international-database.html)
+
+## Code
+
+* [population pyramid](http://www.r-bloggers.com/japans-ageing-population-animated-with-r/)
+* [gganimate](https://github.com/dgrtwo/gganimate)
+
+```{r setup, include=FALSE}
+library(idbr) # devtools::install_github('walkerke/idbr')
+library(countrycode)
+library(ggplot2)
+library(animation)
+library(dplyr)
+library(swiTheme)
+library(viridis)
+
+#countries <- c("Switzerland", "Japan", "China", "United States", "Spain", "France", "India", "Brazil", "Russia", "Morocco")
+countries <- c("France", "Switzerland", "Japan", "China", "United States", "Brazil", "Russia", "Morocco")
+country.iso2 <- countrycode(countries, "country.name", "fips104")
+# hack for UK
+
+#country.iso2[which(country.iso2 == "UK")] <- "GB"
+#country.iso2[which(country.iso2 == "GM")] <- "DE"
+
+#country.iso2 <- c('GB', 'SZ')
+
+downloadData <- F
+
+years <- 1990:2050
+apikey <- "901083ee90dbd111d13f5e270ca00b4abf654be6"
+data.file <- paste0("input/", paste(range(years), collapse = "_"), "_", 
+  paste(country.iso2, collapse = "_"), ".csv")
+
+```
+
+```{r getData, echo = F}
+if(downloadData) {
+  idb_api_key(apikey)
+  
+  data <- do.call(rbind, lapply(country.iso2, function(iso) {
+    cat("\n", iso)
+    
+    male <- idb1(iso, years, sex = 'male') %>%
+      mutate(POP = POP * -1, SEX = 'Male')
+    female <- idb1(iso, years, sex = 'female') %>%
+      mutate(SEX = 'Female')
+    
+    rbind(male, female) %>% 
+      mutate(abs_pop = abs(POP)) %>% select(-AREA_KM2)
+  }))
+  write.csv(data, file = data.file, row.names = F)
+} else {
+  data <- read.csv(data.file)
+}
+
+# for each year, country & sex: compute the proportion for each age
+data <- data %>% group_by(NAME, FIPS, time, SEX) %>% mutate(yearlySum = sum(abs_pop)) %>% ungroup()
+data$abs_prop <- data$abs_pop / data$yearlySum
+data$prop <- ifelse(data$SEX == "Male", data$abs_prop * -1, data$abs_prop)
+
+# sort data by youngest mean age at the beginning
+d.sort <- data %>% filter(time == min(data$time)) %>% 
+  group_by(NAME) %>% 
+  summarise(mean = mean(sum(as.numeric(AGE * abs_pop, na.rm = T)) / 
+    sum(abs_pop, na.rm = T), na.rm = T)) %>% 
+  ungroup() %>% arrange(mean)
+data$NAME <- factor(data$NAME, levels = as.character(d.sort$NAME))
+
+```
+
+```{r plot, echo = F}
+
+plotyear <- function(data, y) {
+
+ ggplot(data = filter(data, time == y), aes(x = AGE, y = prop, fill = SEX, width = 1)) +
+  #coord_fixed() + 
+  coord_flip() +
+  # gender bars
+  geom_area(data = filter(data, SEX == "Female", time == y)) +
+  geom_area(data = filter(data, SEX == "Male", time == y)) +
+  # add median age
+  facet_wrap( ~ NAME, ncol = 2) + 
+  swi_theme(base_size = 24, title_family = "OpenSans-CondensedLight") +
+  scale_fill_manual(values = c('#663333', '#336666')) +
+  scale_y_continuous(
+    labels = scales::percent, 
+    limits = c(-max(data$abs_prop), max(data$abs_prop)),
+    name = y) +
+  theme(
+    legend.position = "top", 
+    legend.title = element_blank(),
+    legend.key.height = unit(0.5, "lines"),
+    legend.key.width = unit(3, "lines")) + 
+  guides(fill = guide_legend(reverse = TRUE)) +
+  labs(subtitle = paste0("Past and projected population structures for a selection of countries, by gender, ",
+    paste(range(years), collapse = "-")),
+    caption = "Source: US Census Bureau IDB; idbr R package | swissinfo.ch",
+    title = y) + 
+  theme(
+    # panel.ontop = TRUE,
+    # panel.grid.major.y = element_line(colour = "white", linetype = 1),
+    plot.title = element_text(size = 44, hjust = 0.5, face = "bold"),
+    axis.text = element_text(size = 13),
+    axis.title.x = element_text(size = 44),
+    plot.caption = element_text(size = 14)
+  ) 
+}
+
+plotyear(data, 1990)
+#plotyear(data, 2050)  
+
+saveGIF({
+	for(y in c(unique(data$time), rep(max(data$time), 3))) {
+	  #cat("\n", y)
+		invisible(print(plotyear(data, y)))
+	}
+}, movie.name = "int_populationStrucutres.gif", interval = 0.15, 
+  ani.width = 700, ani.height = 860, loop = TRUE)
+
+
+
+  
+    
+
