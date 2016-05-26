@@ -117,11 +117,24 @@ le$color <- as.factor(le$color)
 xaxisPadding <- 11
 
 le$country <- gsub("'", "_", le$country)
-le$tooltip <- as.character(le$country)
+# compute the delta life expectancy
+le <- le %>% group_by(iso2c, country, iso3c) %>% 
+  dplyr::mutate(delta = round(last(value) - first(value), 1)) %>%
+  dplyr::mutate(pc = round(((last(value) - first(value)) / first(value)) * 100)) %>% 
+  dplyr::mutate(last = round(last(value))) %>% 
+  ungroup()
+
+maxYear <- max(le$year)
+minYear <- min(le$year)
+le$tooltip <- paste0("<b>", as.character(le$country), "</b><br>",
+              '<div><span style="font-size: 0.8em">',
+              "Life expectancy ", le$last, " years in ", maxYear, ", ",
+              "+", le$pc, "% since ", minYear, "</span></div>")
 
 
-gpath <- ggplot(data = le) +   swi_theme(y_gridlines = F, base_size = 8, base_family = font) + 
-  scale_x_continuous(breaks = seq(min(le$year), max(le$year), 6), expand = c(0, 0), name = "",
+gpath <- ggplot(data = le) +  
+  swi_theme(y_gridlines = F, base_size = 8, base_family = font) + 
+  scale_x_continuous(breaks = seq(minYear, maxYear, 6), expand = c(0, 0), name = "",
     limits = c(min(le$year), max = max(le$year) + xaxisPadding)) +
   ylab("") + 
  coord_fixed(ratio = 0.9) + 
@@ -141,7 +154,7 @@ gpath <- ggplot(data = le) +   swi_theme(y_gridlines = F, base_size = 8, base_fa
     )+
   labs(title = "", subtitle = "") +
   geom_text(data = subset(le, iso2c %in% 
-      c("1W", countries.iso2, regions.iso2) & year == max(le$year)),
+      c("1W", countries.iso2, regions.iso2) & year == maxYear),
       aes(x = year, y = value, group = country, color = color, label = as.character(country)),
       size = 2, family = font, nudge_x = 0.3, nudge_y= 0.1, check_overlap = T, hjust = 0
 	 )
