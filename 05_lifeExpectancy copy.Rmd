@@ -1,0 +1,167 @@
+---
+title: "05_lifeExpectancy"
+author: "Duc-Quang Nguyen"
+date: "24 May 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(WDI)
+library(dplyr)
+library(tidyr)
+library(viridisLite)
+library(htmltools)
+library(svglite)
+library(swiTheme)
+library(ggrepel)
+
+getData <- F
+data.file <- "input/WB_lifeExpectancy_fertilityRate.csv"
+```
+
+```{r getData}
+#### A) Using WB
+indicators <- structure(c('SP.DYN.LE00.IN', 'SP.DYN.TFRT.IN'), names = c('lifeExpectancy', 'fertilityRate'))
+
+
+if(getData) {
+	data.dl <- sapply(1:length(indicators), function(i) {
+		wbdat <- WDI(indicator = indicators[i],
+		  start = 1950,  end = 2016, extra = TRUE, cache = NULL)
+		colnames(wbdat)[3] <- 'value'
+		wbdat$indicator <- names(indicators)[i]
+		wbdat
+	}, simplify = FALSE)
+	
+	data.dl <- do.call(rbind, data.dl)
+	data.dl$indicator <- factor(data.dl$indicator)
+  data <- data.dl %>% select(-capital, -longitude, -latitude, -lending)
+	write.csv(data.dl.sub, file = data.file, row.names = F)
+} else {
+  data <- read.csv( file = data.file )
+}
+```
+
+## Life expectancy
+```{r plot life expectancy}
+
+swi_iso2 <- c("CH", "CN", "RU", "BR", "IN", "JP", "EU", "ZQ", "ZG", "XU", "Z4")
+countries.iso2 <- c(swi_iso2, c('RW', 'SL', 'KH'))
+
+le <- data %>% filter(indicator ==  names(indicators)[1]) %>% arrange(year)
+
+
+# filter out Israel
+#le <- le[le$iso2c != "IL",]
+
+# get the world average
+le3 <- le %>% filter(iso2c == "1W") 
+# get only the countries, i.e. region is not "Aggregates" or NA
+le <- le[!is.na(le$region) & (le$region != "Aggregates" | le$iso2c %in% countries.iso2) ,]
+
+# colors
+le1 <- le[!le$iso2c %in% countries.iso2,]
+le2 <- le[le$iso2c %in% countries.iso2,]
+
+# translate country names to french
+# tCountry <- le2$country
+# tCountry<- as.character(country_names[match(le2$iso2c, as.character(country_names[,1])), 9])
+# idx <- which(is.na(tCountry))
+# tCountry[idx ]<- le2$country[idx]
+# le2$country <- tCountry
+
+# relevel factors
+ff <- dplyr::filter(le2, year == max(le2$year)-1)
+le2$country <- factor(le2$country, levels = ff$country[order(ff$value)])
+
+# basic static test
+ggplot(data = le, aes(x = year, y = value)) + 
+  geom_line(aes(group = country), size = 0.5, alpha = .3, colour = "lightgrey") + theme_swi() +
+  geom_label_repel(data = subset(le, year == 2014 & iso2c %in% countries.iso2), 
+      aes(label = as.character(country)),  nudge_x = 5,  size = 2) +
+      theme(legend.position = "none") + expand_limits(x = 2030) 
+
+
+#x.shift <- 7
+plotMultiLineChart <- function(df1, df2, df3, yscale = "", title = "", xaxisPadding = 4) {
+	gp <- ggplot(data = df1, aes(year, value, group = country)) + 
+	  geom_line( 
+	    color = "darkgrey", alpha = 0.5, size = 0.2) + swi_theme(y_gridlines = F) +
+	  #theme(axis.ticks.y = element_line()
+	 	geom_line(data = df2, aes( color = country), size = 0.5) +
+	  geom_line(data = df3,
+	 	  color = "black", size = 1.6, alpha = 0.6) +
+	  scale_colour_manual(values = swi_rpal) + 
+	  guides(colour = FALSE, fill = FALSE)
+
+	gp + scale_y_continuous(name = yscale, expand = c(0.01,0.01)) + ggtitle(title)+
+	scale_x_continuous(name = "", limits = c(min(le$year), 
+	  max(le$year) + xaxisPadding), expand = c(0.0,0.0)) +
+	 geom_label_repel(data = subset(rbind(df2, df3), year == 2014), 
+      aes(fill = country, label = as.character(country)),
+      nudge_x = 3, force = 1.5, size = 1.6, 
+      color='white', segment.color="lightgrey",
+      box.padding = unit(0.01, "lines")) + 
+	  scale_fill_manual(values = swi_rpal) 
+ }
+
+lep <- plotMultiLineChart(le1, le2, le3, title = "Espérance de vie")
+lep
+
+
+
+### Save as an svg html graphic
+tags$html(
+  tags$head(includeHTML("styles.html")),
+  tags$body(
+    suppressMessages(htmlSVG(print(lep), width = 8, height = 10))
+    )
+) -> chart
+
+html_print(chart, background="#dfdada;")
+save_html(chart, "lifeExpectancy_line.html")
+
+
+
+
+
+
+
+
+
+
+
+
+# interactive 
+library(swiRcharts)
+library(ggiraph)
+
+
+
+
+dd <- le
+dd$country <- gsub("'", "_", dd$country)
+dd$tooltip <- as.character(dd$country)
+
+gpath <- ggplot(data = dd, aes(x = year, y = value, 
+         group = country, tooltip = tooltip, 
+         data_id = dd$country)) + 
+  geom_path_interactive(alpha = 0.1, size = 0.2) + 
+  swi_theme(y_gridlines = F) + 
+  theme(legend.position = "none") 
+ggiraph(
+  code = {print(gpath)},
+  hover_css = "stroke-opacity:1;stroke-width:2px;", 
+  width = "80%", 
+  fontname_sans = "Open Sans"
+)
+
+
+
+
+
+
+
+```
+
+

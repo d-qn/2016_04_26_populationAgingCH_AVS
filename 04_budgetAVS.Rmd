@@ -1,0 +1,119 @@
+---
+title: "Budget AVS"
+author: "Duc-Quang Nguyen"
+date: "23 May 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(dplyr)
+library(tidyr)
+library(shiny)
+library(XLConnect)
+library(swiRcharts)
+
+past.data <- "data/je-f-13.04.01.01.xls"
+forecast.data <- "input/forecast_AVS.csv"
+pastAndForecast.file <- "input/past_forecast_AVS_budget.csv"
+
+concatenatePastData <- F
+chartHeight <- 500
+```
+
+## Load data
+Read the historical AVS data and combine it with the forecast
+
+```{r load data}
+if(concatenatePastData) {
+  ## Read past data
+  sheets <- readxl::excel_sheets(past.data)
+  
+  past <- do.call(cbind, lapply(sheets, function(s) {
+    tt <- readxl::read_excel(past.data, skip  = 4, sheet = s)
+    tt <- tt[c(3, 11, 20),]
+    colnames(tt) <- as.numeric(colnames(tt))
+    stopifnot(unlist(tt[,1]) == c("Total des recettes", "Total des dépenses", "Résultat de répartition (solde sans résultat des placements)"))
+    as.data.frame(tt[,-1])
+  }))
+  past <- past[,which(!is.na(colnames(past)))]
+  past <- do.call(cbind, lapply(past, as.numeric))
+  # sort
+  past <- past[,order(colnames(past))]  
+  
+  ## Read forecast data
+  fc <- read.csv(forecast.data, stringsAsFactors = F, check.names = F)
+  fc <- t(do.call(cbind, lapply(fc, function(n) as.numeric(gsub(" ", "", n)))))
+  colnames(fc) <- fc[1,]
+  fc <- fc[-1,]
+  
+  data <- t(cbind(past[c(2,1,3),], fc))
+  data <- cbind(year = as.numeric(rownames(data)), data)
+  rownames(data) <- NULL
+  write.csv(as.data.frame(data), file = pastAndForecast.file, row.names = F)
+} else {
+  data <- read.csv(file = pastAndForecast.file, check.names = F)  
+}
+
+# round data by year
+data <- do.call(cbind, lapply(data, round))
+# express spending as a negative value
+data[,'Dépenses'] <- data[,'Dépenses'] * -1
+# make data long(er)
+data <- as.data.frame(data) %>% gather("type", "value", -year)
+```
+
+## Chart the area chart
+
+```{r area chart}
+lang <- 'FR'
+
+ a <- Highcharts$new()
+  a$chart(type = 'area', height = chartHeight, spacing = c(4, 0, 8, 0))
+  hSeries <- hSeries2(data.frame(
+    x = data$year,
+    y = data$value,
+    series = data$type), "series")
+  a$series(hSeries)
+  
+  a$colors(c("#e4b4b5", "#bbdddd", "#333333"))
+  a$plotOptions(area = list(stacking = NULL,
+    lineWidth = 1, marker = list(enabled = FALSE, symbol = "circle", radius = 1)),
+    series = list(fillOpacity = 1, trackByArea = TRUE))
+  
+  a$xAxis(title = list(text = ""), crosshair = TRUE, reversed = ifelse(lang == "AR", TRUE, FALSE ),
+    plotBands = list (
+      zIndex = 5,
+      color =  '#f7f5ed', from = 2015, to =  max(data$year),
+      label = list(text = "Prévisions")
+    )
+  )
+
+  a$lang(thousandsSep = " ")
+  a$yAxis(title = list(text = ""),
+    gridLineColor = "#EFEFEF",
+    gridZIndex = 0,
+    labels = list(formatter = "#! function () {return (this.value / 1000) ;} !#", x = -5),
+    opposite = ifelse(lang == 'AR', TRUE, FALSE))
+  
+  a$tooltip(
+    shared =  T, followPointer = T, useHTML = T,
+    borderWidth = 2, style = list(padding = 4),
+    headerFormat =  '<small><b>{point.key}</small></b><table>',        
+    pointFormat = '<tr><td style="color: {series.color}">{series.name}: </td> <td style="text-align: right"><b>{point.y: .0f}</b> millions CHF</td></tr>')
+  a
+  
+  hChart.html <- tempfile("hChart_area")
+  a$save(hChart.html)
+  
+  # Convert highcharts-rCharts html chart into a responsive one
+  hChart2responsiveHTML(hChart.html, output.html = "04_avs_budget_FR.html",
+    h2 = "Budget de l'AVS", descr = "En milliards CHF, prévisions avec la réforme de la prévoyance viellesse",
+    #h2 = txt['main.title',lang], descr = txt['descr',lang],
+    # source = paste0(txt["source",lang], ": ",
+    #   htmlLink(txt["source.link",lang],
+    #   txt["source.name",lang])),
+    h3 = "",
+    author = htmlLink("http://www.swissinfo.ch", "swissinfo.ch"))
+  
+  
+```

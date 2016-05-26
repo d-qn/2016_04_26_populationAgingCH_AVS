@@ -9,10 +9,6 @@ output: html_document
 
 [US census bureau International Data Base (2015)](http://www.census.gov/data/developers/data-sets/international-database.html)
 
-## Code
-
-* [population pyramid](http://www.r-bloggers.com/japans-ageing-population-animated-with-r/)
-* [gganimate](https://github.com/dgrtwo/gganimate)
 
 ```{r setup, include=FALSE}
 library(idbr) # devtools::install_github('walkerke/idbr')
@@ -21,7 +17,6 @@ library(ggplot2)
 library(animation)
 library(dplyr)
 library(swiTheme)
-library(viridis)
 
 
 countries <- c("France", "Switzerland", "Japan", "China", "United States", "Brazil", "Russia", "Morocco")
