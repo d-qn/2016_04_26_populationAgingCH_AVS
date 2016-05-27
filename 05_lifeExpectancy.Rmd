@@ -49,19 +49,26 @@ library(ggiraph)
 library(swiMap)
 library(htmltools)
 
-strokeWidth <- 0.25
+strokeWidth <- 0.3
 font <- "Geneva"
 
 swi_iso2 <- c("CH", "CN", "RU", "BR", "IN", "JP", "EU", "ZQ", "ZG", "XU", "Z4")
 countries.iso2 <- c(swi_iso2, c('RW', 'SL', 'KH'))
 
-iso2.todiscard.manualPicked <- c("AG", "AW", "BB", "BN", "BS", "DJ", "FM", "GD", "GQ", "KG", "VC", "VI", "VC", "ST", "SB", "PF", "KI", "BZ", "LC", "PG")
+iso2.todiscard.manualPicked <- c(
+  "AG", "AW", "BB", "BN", "BS", "DJ", "FM", "GD", 
+  "GQ", "KG", "VC", "VI", "VC", "ST", "SB", "PF", 
+  "KI", "BZ", "LC", "PG", "WS", "VU", "UZ", "TJ", 
+  "TM", "TT", "TO", "TG", "SZ", "SK", "SI", "MU",
+  "MR", "MG", "MD", "LS", "AZ", "DO", "GU", "ME",
+  "EC"
+  )
 
 le <- data %>% filter(indicator ==  names(indicators)[1]) %>% arrange(year)
 
 # get the main regions iso2
 regions.all <- unique( le[!is.na(le$region) & (le$region == "Aggregates") ,"country"])
-main.regions <- regions.all[grep("all income levels", regions.all)]
+main.regions <- regions.all[grep("(all income levels|North America)", regions.all)]
 regions.iso2 <- as.character(le[match(main.regions, le$country), 'iso2c'])
 
 ## Discard some of the data
@@ -114,7 +121,7 @@ le[le$iso2 %in% colors ,'color']  <-  cols[!is.na(cols)]
 le$color <- as.factor(le$color)
 
 
-xaxisPadding <- 11
+xaxisPadding <- 12
 
 le$country <- gsub("'", "_", le$country)
 # compute the delta life expectancy
@@ -141,7 +148,7 @@ gpath <- ggplot(data = le) +
   geom_path_interactive(
     aes(x = year, y = value, group = country, tooltip = tooltip, 
     data_id = le$country, size = strokeWidth, alpha = alpha, colour = color)) + 
-  scale_size_manual(values = c(strokeWidth, strokeWidth * 2.5,  strokeWidth * 5), guide=FALSE) +
+  scale_size_manual(values = c(strokeWidth, strokeWidth * 2.5,  strokeWidth * 6), guide=FALSE) +
   scale_alpha_manual(values = c(0.25, 0.7), guide=FALSE) +
   scale_color_manual(values = c("darkgrey", swi_rpal), guide=FALSE) +
   scale_fill_manual(values =  c("darkgrey", swi_rpal), guide=FALSE) +
@@ -149,25 +156,28 @@ gpath <- ggplot(data = le) +
     legend.position = "none", 
     axis.line.y=element_line(color="#2b2b2b", size=0.15),
     axis.ticks.length=unit(2.7, "pt"),
-    plot.margin = (plot.margin=unit(rep(0, 4), "mm")),
+    plot.margin = unit(rep(0, 4), "mm"),
     plot.title=element_text(margin=margin(rep(0, 4)))
     )+
   labs(title = "", subtitle = "") +
   geom_text(data = subset(le, iso2c %in% 
       c("1W", countries.iso2, regions.iso2) & year == maxYear),
-      aes(x = year, y = value, group = country, color = color, label = as.character(country)),
-      size = 2, family = font, nudge_x = 0.3, nudge_y= 0.1, check_overlap = T, hjust = 0
+      aes(x = year, y = value, group = country, 
+      color = color, label = as.character(country)),
+      size = 2.2, family = font, nudge_x = 0.2, 
+      nudge_y= 0.1, check_overlap = T, hjust = 0
 	 )
 gpath
 
 
 igpath <- ggiraph(
   code = {print(gpath)},
-  hover_css = "stroke-opacity:0.98;stroke-width:3px;",
+  hover_css = "stroke-opacity:0.98;stroke-width:2.2px;stroke:black;",
   tooltip_opacity = 0.7,
   pointsize = 15,
   width = "100%",
-  height_svg = 7.7,
+  #height = "500px",
+  height_svg = 7.1,
   width_svg = 7,
   fontname_sans = "Geneva",
   fontname_serif = "Geneva"
