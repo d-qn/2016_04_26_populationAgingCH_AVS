@@ -68,7 +68,137 @@ img {
 </div>
 
 
+<div id="load-data" class="section level2">
+<h2>Load data</h2>
+<p>Read the historical AVS data and combine it with the forecast</p>
+<pre class="r"><code>if(concatenatePastData) {
+  ## Read past data
+  sheets &lt;- readxl::excel_sheets(past.data)
+  
+  past &lt;- do.call(cbind, lapply(sheets, function(s) {
+    tt &lt;- readxl::read_excel(past.data, skip  = 4, sheet = s)
+    tt &lt;- tt[c(3, 11, 20),]
+    colnames(tt) &lt;- as.numeric(colnames(tt))
+    stopifnot(unlist(tt[,1]) == c(&quot;Total des recettes&quot;, &quot;Total des dépenses&quot;, &quot;Résultat de répartition (solde sans résultat des placements)&quot;))
+    as.data.frame(tt[,-1])
+  }))
+  past &lt;- past[,which(!is.na(colnames(past)))]
+  past &lt;- do.call(cbind, lapply(past, as.numeric))
+  # sort
+  past &lt;- past[,order(colnames(past))]  
+  
+  ## Read forecast data
+  fc &lt;- read.csv(forecast.data, stringsAsFactors = F, check.names = F)
+  fc &lt;- t(do.call(cbind, lapply(fc, function(n) as.numeric(gsub(&quot; &quot;, &quot;&quot;, n)))))
+  colnames(fc) &lt;- fc[1,]
+  fc &lt;- fc[-1,]
+  
+  data &lt;- t(cbind(past[c(2,1,3),], fc))
+  data &lt;- cbind(year = as.numeric(rownames(data)), data)
+  rownames(data) &lt;- NULL
+  write.csv(as.data.frame(data), file = pastAndForecast.file, row.names = F)
+} else {
+  data &lt;- read.csv(file = pastAndForecast.file, check.names = F)  
+}
 
+txt &lt;- read.csv(&quot;input/Budget AVS area chart - Sheet1.csv&quot;, row.names = 1, stringsAsFactors = F)
+# discard incomplete translations
+cidx &lt;- unique(which(txt ==&quot;&quot; | is.na(txt), T)[,2])
+if(length(cidx &gt; 0)) {
+  warning(paste(colnames(txt)[cidx], collapse = &quot;\t&quot;), &quot; languages will be discarded!&quot;, &quot;\n&quot;)
+  txt &lt;- txt[,-cidx, drop = F]
+}</code></pre>
+<pre><code>## Warning: EN  DE  IT  PT  AR  RU  ES  JA  ZH languages will be discarded!</code></pre>
+<pre class="r"><code>colnames(txt)</code></pre>
+<pre><code>## [1] &quot;FR&quot;</code></pre>
+<pre class="r"><code># round data by year
+data &lt;- do.call(cbind, lapply(data, round))
+# express spending as a negative value
+data[,'Dépenses'] &lt;- data[,'Dépenses'] * -1
+# make data long(er)
+data &lt;- as.data.frame(data) %&gt;% gather(&quot;type&quot;, &quot;value&quot;, -year)</code></pre>
+</div>
+<div id="chart-the-area-chart" class="section level2">
+<h2>Chart the area chart</h2>
+<pre class="r"><code>#lang &lt;- 'FR'
+
+sapply(colnames(txt), function(lang) {
+ dd &lt;- data   
+ 
+ categories &lt;- data.frame(
+   ori = c(&quot;Dépenses&quot;, &quot;Recettes&quot;, &quot;Résultat de répartition&quot;), 
+   trans = c(txt[&quot;depenses&quot;, lang], txt[&quot;recettes&quot;, lang], txt[&quot;res&quot;, lang])
+  )
+ dd$type &lt;- categories[match(dd$type, categories$ori), &quot;trans&quot;]
+ 
+ a &lt;- Highcharts$new()
+  a$chart(type = 'area', height = chartHeight, spacing = c(4, 0, 8, 0))
+  hSeries &lt;- hSeries2(data.frame(
+    x = dd$year,
+    y = dd$value,
+    series = dd$type), &quot;series&quot;)
+  a$series(hSeries)
+  
+  a$colors(c(&quot;#996666&quot;, &quot;#669999&quot;, &quot;#333333&quot;))
+  a$plotOptions(area = list(stacking = NULL,
+    lineWidth = 1, marker = list(enabled = FALSE, symbol = &quot;circle&quot;, radius = 1)),
+    series = list(fillOpacity = 0.8, trackByArea = TRUE))
+  
+  a$xAxis(title = list(text = &quot;&quot;), crosshair = TRUE, reversed = ifelse(lang == &quot;AR&quot;, TRUE, FALSE ),
+    plotBands = list (
+      zIndex = 1,
+      color =  '#f7f5ed', from = 2015, to =  max(dd$year),
+      label = list(text = &quot;Prévisions&quot;)
+    )
+  )
+
+  a$lang(thousandsSep = &quot; &quot;)
+  a$yAxis(title = list(text = &quot;&quot;),
+    gridLineColor = &quot;#EFEFEF&quot;,
+    gridZIndex = 0,
+    floor = min(dd$value),
+    labels = list(formatter = &quot;#! function () {return (this.value / 1000) ;} !#&quot;, x = -5),
+    opposite = ifelse(lang == 'AR', TRUE, FALSE))
+  
+  a$tooltip(
+    shared =  T, followPointer = T, useHTML = T,
+    borderWidth = 2, style = list(padding = 4),
+    headerFormat =  '&lt;small&gt;&lt;b&gt;{point.key}&lt;/small&gt;&lt;/b&gt;&lt;table&gt;',        
+    pointFormat = paste0('&lt;tr&gt;&lt;td style=&quot;color: {series.color}&quot;&gt;{series.name} &lt;/td&gt; &lt;td style=&quot;text-align: right&quot;&gt;&lt;b&gt;{point.y: .0f}&lt;/b&gt;', 
+      txt[&quot;millionsCHF&quot;, lang] , '&lt;/td&gt;&lt;/tr&gt;')
+  )
+  a$legend(
+    floating = TRUE,
+    layout = &quot;vertical&quot;,
+    verticalAlign = 'top',
+    align = &quot;left&quot;,
+    x = 45,
+    y = -7,
+    #borderWidth= 0, margin = 1, itemMarginTop = 1, itemMarginBottom = 1, 
+    itemHoverStyle = list(color = '#996666'),
+    title = list(text = paste0('&lt;span style=&quot;font-size: 9px; color: #666; font-weight: normal&quot;&gt;',
+      txt['legend.key', lang], '&lt;/span&gt;&lt;br&gt;')),
+    rtl = ifelse(lang == 'AR', TRUE, FALSE))
+  a
+  
+  hChart.html &lt;- tempfile(&quot;hChart_area&quot;)
+  a$save(hChart.html)
+  
+  # Convert highcharts-rCharts html chart into a responsive one
+  hChart2responsiveHTML(hChart.html, output.html = paste0(&quot;04_avs_budget_sansReforme2020_&quot;, lang, &quot;.html&quot;),
+    h2 = txt[&quot;main.title&quot;, lang], 
+    descr = txt[&quot;descr&quot;, lang],
+    source = paste0(txt[&quot;source&quot;,lang], &quot;: &quot;,
+      htmlLink(txt[&quot;source.link&quot;,lang],
+      txt[&quot;source.name&quot;,lang])),
+    h3 = &quot;&quot;,
+    author = htmlLink(&quot;http://www.swissinfo.ch&quot;, &quot;swissinfo.ch&quot;))
+})</code></pre>
+<pre><code>## Warning in hChart2responsiveHTML(hChart.html, output.html = paste0(&quot;04_avs_budget_sansReforme2020_&quot;, : 
+##  Existing output html renamed to:./04_avs_budget_sansReforme2020_FR_init.html</code></pre>
+<pre><code>## $FR
+## NULL</code></pre>
+</div>
 
 
 </div>

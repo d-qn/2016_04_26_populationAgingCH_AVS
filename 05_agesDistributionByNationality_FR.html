@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700,800,400italic&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+<title>swissinfo.ch</title>
+
+<style type="text/css">
+
+/* ensure data labels are not visible over the tooltip:
+http://stackoverflow.com/questions/15130311/highcharts-labels-visible-over-tooltip */
+.label {
+  z-index: 1 !important;
+}
+
+.highcharts-tooltip span {
+  background-color:white;
+  opacity:1;
+  z-index:9999 !important;
+  border-radius: 3px;
+}
+
+.tooltip {
+  padding:5px;
+}
+
+
+/*  #######   header and footer styling   ########*/
+
+body, h1, h2, h3, h4, h5, h6, .descr, td, table {
+   text-rendering: optimizeLegibility;
+   font-smoothing: antialiased;
+   font-family: 'Open Sans', sans-serif;
+   background-color: white;
+   font-size: 12px;
+   margin:3px 4px 3px 5px;
+}
+
+#cite {
+    font-size: 0.5em; color: #B8B8B8; text-align: right; margin-top:1px; margin-right:10px; padding-bottom: 3px;
+}
+#cite a { text-decoration: none; color: #821122; }
+
+.descr {
+ font-size: 0.8em; color: #707070;
+}
+
+h1 {
+   font-size:2em;
+}
+
+h2 {
+   font-size:1.4em;
+   font-weight: lighter;
+   line-height: 115%;
+}
+
+h3 {
+   font-size:1.2em
+}
+
+h4 {
+   font-size:1.1em;
+}
+
+h5 {
+   font-size:0.9em;
+}
+
+h6 {
+   font-size:0.8em;
+}
+
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+table, td, th {
+  border: none;
+  font-size:0.92em;
+  color : #4d4d4d;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+   body {
+      font-size:12pt;
+      max-width:100%;
+   }
+
+   a, a:visited {
+      text-decoration: underline;
+   }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<script src="js/jquery-2.1.1.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/highcharts.js"></script>
+<script src="js/highcharts-more.js"></script>
+<script src="js/exporting.js"></script>
+<script src="js/heatmap.js"></script>
+<h2> L'âge des Suisses vs étrangers </h2>
+<div class="descr"> Proportion de l'âge de la population résidante permanente suisse selon la nationalité en 2014. L'âge médian des étrangers vivant en Suisse est de 36 ans, tandis que celle des Suisses est de 44 ans.  </div>
+    <div id = 'chartb4a1bd9e1f3' class = 'rChart highcharts'></div>         <script type='text/javascript'>     (function($){         $(function () {             var chart = new Highcharts.Chart({  "dom": "chartb4a1bd9e1f3", "width":            800, "height":            400, "credits": {  "href": null, "text": null  }, "exporting": {  "enabled": false  }, "title": {  "text": null  }, "yAxis": [  {  "title": {  "text": ""  }, "from":              0, "gridLineColor": "#EFEFEF", "labels": {  "formatter":  function () {return (this.value) + ' %';} , "x":             -3  }, "opposite": false  }  ], "chart": {  "type": "area", "height":            450, "spacing": [              5,              0,              3,              0 ], "renderTo": "chartb4a1bd9e1f3"  }, "series": [  {  "data": [  {  "x":              0, "y": 1.137076117148, "probEqOrLess": 1.137076117148  }, {  "x":              1, "y": 1.162145433056, "probEqOrLess": 2.299221550204  }, {  "x":              2, "y": 1.147634252191, "probEqOrLess": 3.446855802396  }, {  "x":              3, "y": 1.120363239876, "probEqOrLess": 4.567219042272  }, {  "x":              4, "y": 1.136125384609, "probEqOrLess": 5.703344426881  }, {  "x":              5, "y": 1.101448666197, "probEqOrLess": 6.804793093078  }, {  "x":              6, "y": 1.084685750371, "probEqOrLess": 7.889478843449  }, {  "x":              7, "y": 1.065420906809, "probEqOrLess": 8.954899750258  }, {  "x":              8, "y": 1.026440872692, "probEqOrLess":  9.98134062295  }, {  "x":              9, "y": 1.043554058402, "probEqOrLess": 11.02489468135  }, {  "x":             10, "y": 1.026340795583, "probEqOrLess": 12.05123547693  }, {  "x":             11, "y": 0.9996702459245, "probEqOrLess": 13.05090572286  }, {  "x":             12, "y": 0.9731998504848, "probEqOrLess": 14.02410557334  }, {  "x":             13, "y": 0.9271643801549, "probEqOrLess":  14.9512699535  }, {  "x":             14, "y": 0.9526340045005, "probEqOrLess":   15.903903958  }, {  "x":             15, "y": 0.911302158313, "probEqOrLess": 16.81520611631  }, {  "x":             16, "y": 0.8854822640845, "probEqOrLess":  17.7006883804  }, {  "x":             17, "y": 0.8650665337643, "probEqOrLess": 18.56575491416  }, {  "x":             18, "y": 0.8862828809598, "probEqOrLess": 19.45203779512  }, {  "x":             19, "y": 0.9361713200021, "probEqOrLess": 20.38820911512  }, {  "x":             20, "y": 0.9658942214977, "probEqOrLess": 21.35410333662  }, {  "x":             21, "y": 1.017383894291, "probEqOrLess": 22.37148723091  }, {  "x":             22, "y": 1.116410194055, "probEqOrLess": 23.48789742497  }, {  "x":             23, "y": 1.228346440933, "probEqOrLess":  24.7162438659  }, {  "x":             24, "y": 1.354743830121, "probEqOrLess": 26.07098769602  }, {  "x":             25, "y": 1.475336746964, "probEqOrLess": 27.54632444298  }, {  "x":             26, "y": 1.679093741728, "probEqOrLess": 29.22541818471  }, {  "x":             27, "y": 1.803239395955, "probEqOrLess": 31.02865758067  }, {  "x":             28, "y": 1.941996308155, "probEqOrLess": 32.97065388882  }, {  "x":             29, "y": 2.090310584305, "probEqOrLess": 35.06096447313  }, {  "x":             30, "y": 2.176977361057, "probEqOrLess": 37.23794183418  }, {  "x":             31, "y": 2.210953539702, "probEqOrLess": 39.44889537389  }, {  "x":             32, "y": 2.309129184036, "probEqOrLess": 41.75802455792  }, {  "x":             33, "y":  2.31618462025, "probEqOrLess": 44.07420917817  }, {  "x":             34, "y":  2.33915231686, "probEqOrLess": 46.41336149503  }, {  "x":             35, "y":  2.24803210874, "probEqOrLess": 48.66139360377  }, {  "x":             36, "y": 2.231669501351, "probEqOrLess": 50.89306310512  }, {  "x":             37, "y": 2.208501650522, "probEqOrLess": 53.10156475564  }, {  "x":             38, "y": 2.157162093393, "probEqOrLess": 55.25872684904  }, {  "x":             39, "y": 2.076950290199, "probEqOrLess": 57.33567713924  }, {  "x":             40, "y": 2.042473726006, "probEqOrLess": 59.37815086524  }, {  "x":             41, "y": 1.957408183005, "probEqOrLess": 61.33555904825  }, {  "x":             42, "y": 1.947600626283, "probEqOrLess": 63.28315967453  }, {  "x":             43, "y": 1.902716042711, "probEqOrLess": 65.18587571724  }, {  "x":             44, "y": 1.872442717114, "probEqOrLess": 67.05831843435  }, {  "x":             45, "y": 1.836214803506, "probEqOrLess": 68.89453323786  }, {  "x":             46, "y":  1.83041033116, "probEqOrLess": 70.72494356902  }, {  "x":             47, "y": 1.787677405441, "probEqOrLess": 72.51262097446  }, {  "x":             48, "y": 1.774016880006, "probEqOrLess": 74.28663785447  }, {  "x":             49, "y": 1.705714252832, "probEqOrLess":  75.9923521073  }, {  "x":             50, "y": 1.697157659977, "probEqOrLess": 77.68950976728  }, {  "x":             51, "y": 1.572211388875, "probEqOrLess": 79.26172115615  }, {  "x":             52, "y": 1.481541527747, "probEqOrLess":  80.7432626839  }, {  "x":             53, "y": 1.368754625439, "probEqOrLess": 82.11201730934  }, {  "x":             54, "y": 1.320417381593, "probEqOrLess": 83.43243469093  }, {  "x":             55, "y": 1.204127780455, "probEqOrLess": 84.63656247138  }, {  "x":             56, "y": 1.104400940925, "probEqOrLess": 85.74096341231  }, {  "x":             57, "y": 1.023538636519, "probEqOrLess": 86.76450204883  }, {  "x":             58, "y": 0.9655939901694, "probEqOrLess":   87.730096039  }, {  "x":             59, "y": 0.8953398593616, "probEqOrLess": 88.62543589836  }, {  "x":             60, "y": 0.8222335309356, "probEqOrLess":  89.4476694293  }, {  "x":             61, "y": 0.738318874693, "probEqOrLess": 90.18598830399  }, {  "x":             62, "y": 0.6978877224902, "probEqOrLess": 90.88387602648  }, {  "x":             63, "y": 0.6276335916824, "probEqOrLess": 91.51150961816  }, {  "x":             64, "y": 0.6397429219213, "probEqOrLess": 92.15125254008  }, {  "x":             65, "y": 0.5725411429506, "probEqOrLess": 92.72379368303  }, {  "x":             66, "y": 0.5536265692716, "probEqOrLess":  93.2774202523  }, {  "x":             67, "y": 0.5198505448448, "probEqOrLess": 93.79727079715  }, {  "x":             68, "y": 0.496632655461, "probEqOrLess": 94.29390345261  }, {  "x":             69, "y": 0.4216749005108, "probEqOrLess": 94.71557835312  }, {  "x":             70, "y": 0.4465941007546, "probEqOrLess": 95.16217245388  }, {  "x":             71, "y": 0.4292307222715, "probEqOrLess": 95.59140317615  }, {  "x":             72, "y": 0.4231260185973, "probEqOrLess": 96.01452919474  }, {  "x":             73, "y": 0.4176217775796, "probEqOrLess": 96.43215097232  }, {  "x":             74, "y": 0.4322830741086, "probEqOrLess": 96.86443404643  }, {  "x":             75, "y": 0.3995578593306, "probEqOrLess": 97.26399190576  }, {  "x":             76, "y": 0.3628295601761, "probEqOrLess": 97.62682146594  }, {  "x":             77, "y": 0.3298041140699, "probEqOrLess": 97.95662558001  }, {  "x":             78, "y": 0.2922751980401, "probEqOrLess": 98.24890077805  }, {  "x":             79, "y": 0.269107347211, "probEqOrLess": 98.51800812526  }, {  "x":             80, "y": 0.2359317854407, "probEqOrLess":  98.7539399107  }, {  "x":             81, "y": 0.1999540646068, "probEqOrLess": 98.95389397531  }, {  "x":             82, "y": 0.1723327824088, "probEqOrLess": 99.12622675772  }, {  "x":             83, "y": 0.1501657026739, "probEqOrLess": 99.27639246039  }, {  "x":             84, "y": 0.1407584543891, "probEqOrLess": 99.41715091478  }, {  "x":             85, "y": 0.1130370950818, "probEqOrLess": 99.53018800986  }, {  "x":             86, "y": 0.09642429491924, "probEqOrLess": 99.62661230478  }, {  "x":             87, "y": 0.08161288272614, "probEqOrLess": 99.70822518751  }, {  "x":             88, "y": 0.06550046811068, "probEqOrLess": 99.77372565562  }, {  "x":             89, "y": 0.05334109931702, "probEqOrLess": 99.82706675493  }, {  "x":             90, "y": 0.04388381247751, "probEqOrLess": 99.87095056741  }, {  "x":             91, "y": 0.03812937868628, "probEqOrLess":  99.9090799461  }, {  "x":             92, "y": 0.02622020266615, "probEqOrLess": 99.93530014876  }, {  "x":             93, "y": 0.01966515199962, "probEqOrLess": 99.95496530076  }, {  "x":             94, "y": 0.01656276160782, "probEqOrLess": 99.97152806237  }, {  "x":             95, "y": 0.009507325394216, "probEqOrLess": 99.98103538777  }, {  "x":             96, "y": 0.005254048244172, "probEqOrLess": 99.98628943601  }, {  "x":             97, "y": 0.004003084376512, "probEqOrLess": 99.99029252039  }, {  "x":             98, "y": 0.002652043399439, "probEqOrLess": 99.99294456379  }, {  "x":             99, "y": 0.002401850625907, "probEqOrLess": 99.99534641441  }, {  "x":            100, "y": 0.004653585587695, "probEqOrLess":            100  }  ], "name": "Etrangers"  }, {  "data": [  {  "x":              0, "y": 0.9777845165259, "probEqOrLess": 0.9777845165259  }, {  "x":              1, "y": 0.965972117931, "probEqOrLess": 1.943756634457  }, {  "x":              2, "y": 0.9770792986993, "probEqOrLess": 2.920835933156  }, {  "x":              3, "y": 0.9710528918178, "probEqOrLess": 3.891888824974  }, {  "x":              4, "y": 0.9855899956517, "probEqOrLess": 4.877478820626  }, {  "x":              5, "y": 0.971677971255, "probEqOrLess": 5.849156791881  }, {  "x":              6, "y": 0.9681518821222, "probEqOrLess": 6.817308674003  }, {  "x":              7, "y": 0.9506015748476, "probEqOrLess": 7.767910248851  }, {  "x":              8, "y": 0.9503451320016, "probEqOrLess": 8.718255380852  }, {  "x":              9, "y": 0.9420427948616, "probEqOrLess": 9.660298175714  }, {  "x":             10, "y": 0.9474761776617, "probEqOrLess": 10.60777435338  }, {  "x":             11, "y": 0.9358881665571, "probEqOrLess": 11.54366251993  }, {  "x":             12, "y": 0.9619171154283, "probEqOrLess": 12.50557963536  }, {  "x":             13, "y": 0.9821119895525, "probEqOrLess": 13.48769162491  }, {  "x":             14, "y": 1.051784305281, "probEqOrLess": 14.53947593019  }, {  "x":             15, "y": 1.058227431787, "probEqOrLess": 15.59770336198  }, {  "x":             16, "y": 1.089369209901, "probEqOrLess": 16.68707257188  }, {  "x":             17, "y": 1.119373022886, "probEqOrLess": 17.80644559477  }, {  "x":             18, "y": 1.164522991463, "probEqOrLess": 18.97096858623  }, {  "x":             19, "y": 1.164635185209, "probEqOrLess": 20.13560377144  }, {  "x":             20, "y": 1.186032135174, "probEqOrLess": 21.32163590661  }, {  "x":             21, "y": 1.206307147687, "probEqOrLess":  22.5279430543  }, {  "x":             22, "y": 1.253765101879, "probEqOrLess": 23.78170815618  }, {  "x":             23, "y": 1.262820739879, "probEqOrLess": 25.04452889606  }, {  "x":             24, "y": 1.257643799925, "probEqOrLess": 26.30217269599  }, {  "x":             25, "y": 1.233137480452, "probEqOrLess": 27.53531017644  }, {  "x":             26, "y":  1.22719121196, "probEqOrLess":  28.7625013884  }, {  "x":             27, "y": 1.173594657142, "probEqOrLess": 29.93609604554  }, {  "x":             28, "y": 1.176078947212, "probEqOrLess": 31.11217499275  }, {  "x":             29, "y": 1.148815867145, "probEqOrLess":  32.2609908599  }, {  "x":             30, "y": 1.146892545799, "probEqOrLess":  33.4078834057  }, {  "x":             31, "y": 1.131730362528, "probEqOrLess": 34.53961376822  }, {  "x":             32, "y": 1.145546220858, "probEqOrLess": 35.68515998908  }, {  "x":             33, "y": 1.136009752521, "probEqOrLess":  36.8211697416  }, {  "x":             34, "y": 1.138862679183, "probEqOrLess": 37.96003242079  }, {  "x":             35, "y": 1.117449701541, "probEqOrLess": 39.07748212233  }, {  "x":             36, "y": 1.102848486995, "probEqOrLess": 40.18033060932  }, {  "x":             37, "y": 1.112064401774, "probEqOrLess":  41.2923950111  }, {  "x":             38, "y": 1.117433673863, "probEqOrLess": 42.40982868496  }, {  "x":             39, "y": 1.134919870426, "probEqOrLess": 43.54474855539  }, {  "x":             40, "y": 1.188468342211, "probEqOrLess":  44.7332168976  }, {  "x":             41, "y": 1.226261606643, "probEqOrLess": 45.95947850424  }, {  "x":             42, "y": 1.286108955834, "probEqOrLess": 47.24558746007  }, {  "x":             43, "y": 1.363811138178, "probEqOrLess": 48.60939859825  }, {  "x":             44, "y": 1.401828790101, "probEqOrLess": 50.01122738835  }, {  "x":             45, "y": 1.465634975727, "probEqOrLess": 51.47686236408  }, {  "x":             46, "y":  1.51451939325, "probEqOrLess": 52.99138175733  }, {  "x":             47, "y": 1.548626291771, "probEqOrLess":  54.5400080491  }, {  "x":             48, "y": 1.598023594986, "probEqOrLess": 56.13803164409  }, {  "x":             49, "y": 1.623491575131, "probEqOrLess": 57.76152321922  }, {  "x":             50, "y": 1.658351774512, "probEqOrLess": 59.41987499373  }, {  "x":             51, "y": 1.633268458636, "probEqOrLess": 61.05314345237  }, {  "x":             52, "y": 1.579014769024, "probEqOrLess": 62.63215822139  }, {  "x":             53, "y": 1.542792217024, "probEqOrLess": 64.17495043841  }, {  "x":             54, "y": 1.503091658924, "probEqOrLess": 65.67804209734  }, {  "x":             55, "y": 1.479210418888, "probEqOrLess": 67.15725251623  }, {  "x":             56, "y": 1.438708476895, "probEqOrLess": 68.59596099312  }, {  "x":             57, "y": 1.418016744756, "probEqOrLess": 70.01397773788  }, {  "x":             58, "y":   1.3799510098, "probEqOrLess": 71.39392874768  }, {  "x":             59, "y": 1.331210841378, "probEqOrLess": 72.72513958905  }, {  "x":             60, "y": 1.298915070457, "probEqOrLess": 74.02405465951  }, {  "x":             61, "y": 1.269440170842, "probEqOrLess": 75.29349483035  }, {  "x":             62, "y": 1.263670206807, "probEqOrLess": 76.55716503716  }, {  "x":             63, "y": 1.221084666689, "probEqOrLess": 77.77824970385  }, {  "x":             64, "y": 1.246151954888, "probEqOrLess": 79.02440165874  }, {  "x":             65, "y": 1.228361232445, "probEqOrLess": 80.25276289118  }, {  "x":             66, "y": 1.239692800704, "probEqOrLess": 81.49245569189  }, {  "x":             67, "y": 1.221902078261, "probEqOrLess": 82.71435777015  }, {  "x":             68, "y": 1.217093774898, "probEqOrLess": 83.93145154504  }, {  "x":             69, "y": 1.172392581301, "probEqOrLess": 85.10384412634  }, {  "x":             70, "y":  1.13692333016, "probEqOrLess": 86.24076745651  }, {  "x":             71, "y": 1.087077251965, "probEqOrLess": 87.32784470847  }, {  "x":             72, "y": 1.024216699334, "probEqOrLess":  88.3520614078  }, {  "x":             73, "y": 0.9403759163624, "probEqOrLess": 89.29243732417  }, {  "x":             74, "y": 0.840603621582, "probEqOrLess": 90.13304094575  }, {  "x":             75, "y": 0.8139816486294, "probEqOrLess": 90.94702259438  }, {  "x":             76, "y": 0.7825834276696, "probEqOrLess": 91.72960602205  }, {  "x":             77, "y": 0.7426103990459, "probEqOrLess": 92.47221642109  }, {  "x":             78, "y": 0.7359589127272, "probEqOrLess": 93.20817533382  }, {  "x":             79, "y": 0.7159884260933, "probEqOrLess": 93.92416375991  }, {  "x":             80, "y": 0.6839490980184, "probEqOrLess": 94.60811285793  }, {  "x":             81, "y": 0.6419405543044, "probEqOrLess": 95.25005341224  }, {  "x":             82, "y": 0.615671190265, "probEqOrLess":  95.8657246025  }, {  "x":             83, "y":  0.57276509659, "probEqOrLess": 96.43848969909  }, {  "x":             84, "y": 0.5394595819629, "probEqOrLess": 96.97794928105  }, {  "x":             85, "y": 0.4867766047833, "probEqOrLess": 97.46472588584  }, {  "x":             86, "y": 0.438453155986, "probEqOrLess": 97.90317904182  }, {  "x":             87, "y": 0.3831095842789, "probEqOrLess":  98.2862886261  }, {  "x":             88, "y": 0.3472396411916, "probEqOrLess": 98.63352826729  }, {  "x":             89, "y": 0.2991886629182, "probEqOrLess": 98.93271693021  }, {  "x":             90, "y": 0.2546637737777, "probEqOrLess": 99.18738070399  }, {  "x":             91, "y": 0.2085200891716, "probEqOrLess": 99.39590079316  }, {  "x":             92, "y": 0.167633482909, "probEqOrLess": 99.56353427607  }, {  "x":             93, "y": 0.1376617252802, "probEqOrLess": 99.70119600135  }, {  "x":             94, "y": 0.09940365818925, "probEqOrLess": 99.80059965954  }, {  "x":             95, "y": 0.06401454543823, "probEqOrLess": 99.86461420498  }, {  "x":             96, "y": 0.04481338734233, "probEqOrLess": 99.90942759232  }, {  "x":             97, "y": 0.03102958436865, "probEqOrLess": 99.94045717669  }, {  "x":             98, "y": 0.02207011243576, "probEqOrLess": 99.96252728913  }, {  "x":             99, "y": 0.01423257795422, "probEqOrLess": 99.97675986708  }, {  "x":            100, "y": 0.02324013292074, "probEqOrLess":            100  }  ], "name": "Suisses"  }  ], "colors": [ "#336666", "#663333" ], "plotOptions": {  "area": {  "stacking": null, "lineWidth":            0.5, "marker": {  "enabled": false, "symbol": "circle", "radius":              1  }  }, "series": {  "fillOpacity":            0.5, "trackByArea": true  }  }, "xAxis": [  {  "title": {  "text": ""  }, "crosshair": true, "reversed": false  }  ], "lang": {  "thousandsSep": " "  }, "tooltip": {  "shared": true, "followPointer": true, "useHTML": true, "borderWidth":              1, "style": {  "padding":              2  }, "headerFormat": " <larger><strong>{point.key}</larger></strong> ans<table>", "pointFormat": "<tr><td style=\"color: {series.color}\">{series.name}: </td><td style=\"text-align: right\"><b>{point.y: .1f}</b>%</td><td>({point.probEqOrLess: .1f}% ont cet âge ou moins)</td></tr>"  }, "legend": {  "floating": true, "layout": "vertical", "verticalAlign": "top", "align": "right", "x":            -20, "y":              0, "itemHoverStyle": {  "color": "#996666"  }, "title": {  "text": "<span style=\"font-size: 9px; color: #666; font-weight: normal\">Nationalités</span><br>"  }, "rtl": false  }, "id": "chartb4a1bd9e1f3"  });         });     })(jQuery); </script>
+
+<!-- Source -->
+<div id="cite"> source: <a href="https://www.pxweb.bfs.admin.ch/Selection.aspx?px_language=fr&px_db=px-x-0102010000_101&px_tableid=px-x-0102010000_101%5Cpx-x-0102010000_101.px&px_type=PX" target="_blank">Office fédéral de la statistique</a> | <a href="http://www.swissinfo.ch" target="_blank">swissinfo.ch</a> </div>
+<script type="text/javascript" src="https://www.swissinfo.ch/static/Themes/basic/js/vendor/iframeResizer.contentWindow.3.5.3.min.js"></script>
+</body>
+</html>

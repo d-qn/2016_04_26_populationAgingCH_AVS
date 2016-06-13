@@ -1,0 +1,145 @@
+---
+title: "05_ageDistribution_byNationality"
+author: "Duc-Quang Nguyen"
+date: "10 June 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(magrittr)
+library(dplyr)
+library(tidyr)
+library(swiTheme)
+```
+
+## Load data
+```{r dataload}
+  data.read <- read.csv2("input/px-x-0102010000_101.csv", stringsAsFactors = F, check.names = F, skip = 1, encoding = "latin1")
+
+  # drop some columns
+  data <- data.read %>% select (-`Canton (-) / District (>>) / Commune (......)`, -`Type de population`, -`Sexe`, -`Année`)
+
+  # make data long
+  data <- data %>% gather(age, value, -Nationalité)
+  # remove "ans" from the age and convert to numeric
+  data$age <- as.numeric(gsub(" an.*$", "", data$age))
+  
+  # 
+  data %<>% group_by(Nationalité) %>% mutate (yearly = sum(value)) %>% ungroup()
+  data$prop <- (data$value / data$yearly) * 100
+
+  # compute the density function <= 
+  data %<>% group_by(Nationalité) %>% mutate(valEqOrLess = cumsum(value)) %>% ungroup()
+  data$probEqOrLess <- (data$valEqOrLess / data$yearly) * 100
+  
+  # compute the median age by nat
+  ages <- by(data, data$`Nationalité`, function(ddd) {
+    ages <- sapply (sapply(1:nrow(ddd), function(i) rep(ddd[i, 'age'], ddd[i, 'value']), USE.NAMES = F), unlist, USE.NAMES = F)
+    do.call(c, ages)
+  })
+  median(ages$Etranger)
+  median(ages$Suisse)
+  median(c(ages$Etranger, ages$Suisse))
+  
+  txt <- read.csv("input/Age distribution Swiss vs non-Swiss - Sheet1.csv", row.names = 1, stringsAsFactors = F)
+  # discard incomplete translations
+  cidx <- unique(which(txt =="" | is.na(txt), T)[,2])
+  if(length(cidx > 0)) {
+    warning(paste(colnames(txt)[cidx], collapse = "\t"), " languages will be discarded!", "\n")
+    txt <- txt[,-cidx, drop = F]
+  }
+  colnames(txt)
+```
+
+## Plot
+```{r plot}
+
+gp <- ggplot(data = data, aes(age, prop)) + 
+  scale_y_continuous(labels = scales::percent) +
+  geom_area(aes(fill = Nationalité), position = "identity", alpha = 0.6) + 
+  swi_theme(base_size = 30) + scale_fill_manual(values = swi_rpal) +
+  labs(title = "L'âge de la population en Suisse par nationalité",
+    subtitle = "En 2014")
+#png("ageDistrib_byNat.png", width = 1200, height = 1000)
+gp
+#dev.off()
+```
+
+
+## Chart the area chart
+
+```{r area chart}
+library(swiRcharts)
+
+chartHeight <- 450
+lang <- 'FR'
+
+sapply(colnames(txt), function(lang) {
+ dd <- data   
+ 
+ categories <- data.frame(
+   ori = c("Suisse", "Etranger"), 
+   trans = c(txt["suisse.cat", lang], txt["etranger.cat", lang])
+  )
+ dd$Nationalité <- categories[match(dd$Nationalité, categories$ori), "trans"]
+ 
+ a <- Highcharts$new()
+  a$chart(type = 'area', height = chartHeight, spacing = c(5, 0, 3, 0))
+  hSeries <- hSeries2(data.frame(
+    x = dd$age,
+    y = dd$prop,
+    probEqOrLess = dd$probEqOrLess,
+    series = dd$Nationalité), "series")
+  a$series(hSeries)
+  
+  a$colors(c("#336666", "#663333"))
+  a$plotOptions(area = list(stacking = NULL,
+    lineWidth = 0.5, marker = list(enabled = FALSE, symbol = "circle", radius = 1)),
+    series = list(fillOpacity = 0.5, trackByArea = TRUE))
+  
+  a$xAxis(title = list(text = ""), crosshair = TRUE, 
+    reversed = ifelse(lang == "AR", TRUE, FALSE ))
+
+  a$lang(thousandsSep = " ")
+  a$yAxis(title = list(text = ""),
+    from = 0,
+    gridLineColor = "#EFEFEF",
+    labels = list(formatter = "#! function () {return (this.value) + ' %';} !#", x = -3),
+    opposite = ifelse(lang == 'AR', TRUE, FALSE))
+  
+  a$tooltip(
+    shared =  T, followPointer = T, useHTML = T,
+    borderWidth = 1, style = list(padding = 2),
+    headerFormat =  ' <larger><strong>{point.key}</larger></strong> ans<table>',        
+    pointFormat = paste0(
+      '<tr><td style="color: {series.color}">{series.name}: </td>', 
+      '<td style="text-align: right"><b>{point.y: .1f}</b>%</td>', 
+      '<td>({point.probEqOrLess: .1f}% ', txt["tooltip", lang], ')</td></tr>'))
+
+  a$legend(
+    floating = TRUE,
+    layout = "vertical",
+    verticalAlign = 'top',
+    align = "right",
+    x = -20,
+    y = 0,
+    itemHoverStyle = list(color = '#996666'),
+    title = list(text = paste0('<span style="font-size: 9px; color: #666; font-weight: normal">',
+      txt['legend.title', lang], '</span><br>')),
+    rtl = ifelse(lang == 'AR', TRUE, FALSE))
+  
+  hChart.html <- tempfile("hChart_area")
+  a$save(hChart.html)
+  
+  # Convert highcharts-rCharts html chart into a responsive one
+  hChart2responsiveHTML(hChart.html, output.html = paste0("05_agesDistributionByNationality_", lang, ".html"),
+    h2 = txt["main.title", lang], 
+    descr = txt["descr", lang],
+    source = paste0(txt["source",lang], ": ",
+      htmlLink(txt["source.link",lang],
+      txt["source.name",lang])),
+    h3 = "",
+    author = htmlLink("http://www.swissinfo.ch", "swissinfo.ch"))
+}) 
+  
+```

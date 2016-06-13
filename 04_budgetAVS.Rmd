@@ -13,11 +13,11 @@ library(XLConnect)
 library(swiRcharts)
 
 past.data <- "data/je-f-13.04.01.01.xls"
-forecast.data <- "input/forecast_AVS.csv"
-pastAndForecast.file <- "input/past_forecast_AVS_budget.csv"
+forecast.data <- "input/forecast_AVS_sansRevision2020.csv"
+pastAndForecast.file <- "input/past_forecastSansRevision2020_AVS_budget.csv"
 
 concatenatePastData <- F
-chartHeight <- 500
+chartHeight <- 470
 ```
 
 ## Load data
@@ -54,6 +54,16 @@ if(concatenatePastData) {
   data <- read.csv(file = pastAndForecast.file, check.names = F)  
 }
 
+txt <- read.csv("input/Budget AVS area chart - Sheet1.csv", row.names = 1, stringsAsFactors = F)
+# discard incomplete translations
+cidx <- unique(which(txt =="" | is.na(txt), T)[,2])
+if(length(cidx > 0)) {
+  warning(paste(colnames(txt)[cidx], collapse = "\t"), " languages will be discarded!", "\n")
+  txt <- txt[,-cidx, drop = F]
+}
+colnames(txt)
+
+
 # round data by year
 data <- do.call(cbind, lapply(data, round))
 # express spending as a negative value
@@ -65,25 +75,34 @@ data <- as.data.frame(data) %>% gather("type", "value", -year)
 ## Chart the area chart
 
 ```{r area chart}
-lang <- 'FR'
+#lang <- 'FR'
 
+sapply(colnames(txt), function(lang) {
+ dd <- data   
+ 
+ categories <- data.frame(
+   ori = c("Dépenses", "Recettes", "Résultat de répartition"), 
+   trans = c(txt["depenses", lang], txt["recettes", lang], txt["res", lang])
+  )
+ dd$type <- categories[match(dd$type, categories$ori), "trans"]
+ 
  a <- Highcharts$new()
   a$chart(type = 'area', height = chartHeight, spacing = c(4, 0, 8, 0))
   hSeries <- hSeries2(data.frame(
-    x = data$year,
-    y = data$value,
-    series = data$type), "series")
+    x = dd$year,
+    y = dd$value,
+    series = dd$type), "series")
   a$series(hSeries)
   
-  a$colors(c("#e4b4b5", "#bbdddd", "#333333"))
+  a$colors(c("#996666", "#669999", "#333333"))
   a$plotOptions(area = list(stacking = NULL,
     lineWidth = 1, marker = list(enabled = FALSE, symbol = "circle", radius = 1)),
-    series = list(fillOpacity = 1, trackByArea = TRUE))
+    series = list(fillOpacity = 0.8, trackByArea = TRUE))
   
   a$xAxis(title = list(text = ""), crosshair = TRUE, reversed = ifelse(lang == "AR", TRUE, FALSE ),
     plotBands = list (
-      zIndex = 5,
-      color =  '#f7f5ed', from = 2015, to =  max(data$year),
+      zIndex = 1,
+      color =  '#f7f5ed', from = 2015, to =  max(dd$year),
       label = list(text = "Prévisions")
     )
   )
@@ -92,6 +111,7 @@ lang <- 'FR'
   a$yAxis(title = list(text = ""),
     gridLineColor = "#EFEFEF",
     gridZIndex = 0,
+    floor = min(dd$value),
     labels = list(formatter = "#! function () {return (this.value / 1000) ;} !#", x = -5),
     opposite = ifelse(lang == 'AR', TRUE, FALSE))
   
@@ -99,21 +119,35 @@ lang <- 'FR'
     shared =  T, followPointer = T, useHTML = T,
     borderWidth = 2, style = list(padding = 4),
     headerFormat =  '<small><b>{point.key}</small></b><table>',        
-    pointFormat = '<tr><td style="color: {series.color}">{series.name}: </td> <td style="text-align: right"><b>{point.y: .0f}</b> millions CHF</td></tr>')
+    pointFormat = paste0('<tr><td style="color: {series.color}">{series.name} </td> <td style="text-align: right"><b>{point.y: .0f}</b>', 
+      txt["millionsCHF", lang] , '</td></tr>')
+  )
+  a$legend(
+    floating = TRUE,
+    layout = "vertical",
+    verticalAlign = 'top',
+    align = "left",
+    x = 45,
+    y = -7,
+    #borderWidth= 0, margin = 1, itemMarginTop = 1, itemMarginBottom = 1, 
+    itemHoverStyle = list(color = '#996666'),
+    title = list(text = paste0('<span style="font-size: 9px; color: #666; font-weight: normal">',
+      txt['legend.key', lang], '</span><br>')),
+    rtl = ifelse(lang == 'AR', TRUE, FALSE))
   a
   
   hChart.html <- tempfile("hChart_area")
   a$save(hChart.html)
   
   # Convert highcharts-rCharts html chart into a responsive one
-  hChart2responsiveHTML(hChart.html, output.html = "04_avs_budget_FR.html",
-    h2 = "Budget de l'AVS", descr = "En milliards CHF, prévisions avec la réforme de la prévoyance viellesse",
-    #h2 = txt['main.title',lang], descr = txt['descr',lang],
-    # source = paste0(txt["source",lang], ": ",
-    #   htmlLink(txt["source.link",lang],
-    #   txt["source.name",lang])),
+  hChart2responsiveHTML(hChart.html, output.html = paste0("04_avs_budget_sansReforme2020_", lang, ".html"),
+    h2 = txt["main.title", lang], 
+    descr = txt["descr", lang],
+    source = paste0(txt["source",lang], ": ",
+      htmlLink(txt["source.link",lang],
+      txt["source.name",lang])),
     h3 = "",
     author = htmlLink("http://www.swissinfo.ch", "swissinfo.ch"))
-  
+})
   
 ```
