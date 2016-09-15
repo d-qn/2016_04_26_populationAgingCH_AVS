@@ -54,14 +54,14 @@ library(swiTheme)
 ## Plot
 ```{r plot}
 
-gp <- ggplot(data = data, aes(age, prop)) + 
-  scale_y_continuous(labels = scales::percent) +
-  geom_area(aes(fill = Nationalité), position = "identity", alpha = 0.6) + 
-  swi_theme(base_size = 30) + scale_fill_manual(values = swi_rpal) +
-  labs(title = "L'âge de la population en Suisse par nationalité",
-    subtitle = "En 2014")
-#png("ageDistrib_byNat.png", width = 1200, height = 1000)
-gp
+# gp <- ggplot(data = data, aes(age, prop)) + 
+#   scale_y_continuous(labels = scales::percent) +
+#   geom_area(aes(fill = Nationalité), position = "identity", alpha = 0.6) + 
+#   swi_theme(base_size = 30) + scale_fill_manual(values = swi_rpal) +
+#   labs(title = "L'âge de la population en Suisse par nationalité",
+#     subtitle = "En 2014")
+# #png("ageDistrib_byNat.png", width = 1200, height = 1000)
+# gp
 #dev.off()
 ```
 
@@ -70,6 +70,7 @@ gp
 
 ```{r area chart}
 library(swiRcharts)
+library(rCharts)
 
 chartHeight <- 450
 lang <- 'FR'
@@ -110,7 +111,7 @@ sapply(colnames(txt), function(lang) {
   a$tooltip(
     shared =  T, followPointer = T, useHTML = T,
     borderWidth = 1, style = list(padding = 2),
-    headerFormat =  ' <larger><strong>{point.key}</larger></strong> ans<table>',        
+    headerFormat =  paste0(' <larger><strong>{point.key}</larger></strong> ', txt["ans", lang], '<table>'),        
     pointFormat = paste0(
       '<tr><td style="color: {series.color}">{series.name}: </td>', 
       '<td style="text-align: right"><b>{point.y: .1f}</b>%</td>', 
@@ -124,8 +125,8 @@ sapply(colnames(txt), function(lang) {
     x = -20,
     y = 0,
     itemHoverStyle = list(color = '#996666'),
-    title = list(text = paste0('<span style="font-size: 9px; color: #666; font-weight: normal">',
-      txt['legend.title', lang], '</span><br>')),
+    # title = list(text = paste0('<span style="font-size: 9px; color: #666; font-weight: normal">',
+    #   txt['legend.title', lang], '</span><br>')),
     rtl = ifelse(lang == 'AR', TRUE, FALSE))
   
   hChart.html <- tempfile("hChart_area")

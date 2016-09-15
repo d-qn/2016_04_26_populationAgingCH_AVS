@@ -11,6 +11,7 @@ library(tidyr)
 library(shiny)
 library(XLConnect)
 library(swiRcharts)
+library(rCharts)
 
 past.data <- "data/je-f-13.04.01.01.xls"
 forecast.data <- "input/forecast_AVS_sansRevision2020.csv"
@@ -84,7 +85,9 @@ sapply(colnames(txt), function(lang) {
    ori = c("Dépenses", "Recettes", "Résultat de répartition"), 
    trans = c(txt["depenses", lang], txt["recettes", lang], txt["res", lang])
   )
- dd$type <- categories[match(dd$type, categories$ori), "trans"]
+  dd$type <- categories[match(dd$type, categories$ori), "trans"]
+  dd$type <-  factor(dd$type,levels(dd$type)[match(categories[,2], levels(dd$type))] )
+ 
  
  a <- Highcharts$new()
   a$chart(type = 'area', height = chartHeight, spacing = c(4, 0, 8, 0))
@@ -103,7 +106,7 @@ sapply(colnames(txt), function(lang) {
     plotBands = list (
       zIndex = 1,
       color =  '#f7f5ed', from = 2015, to =  max(dd$year),
-      label = list(text = "Prévisions")
+      label = list(text = txt["forecast", lang])
     )
   )
 
@@ -119,7 +122,7 @@ sapply(colnames(txt), function(lang) {
     shared =  T, followPointer = T, useHTML = T,
     borderWidth = 2, style = list(padding = 4),
     headerFormat =  '<small><b>{point.key}</small></b><table>',        
-    pointFormat = paste0('<tr><td style="color: {series.color}">{series.name} </td> <td style="text-align: right"><b>{point.y: .0f}</b>', 
+    pointFormat = paste0('<tr><td style="color: {series.color}">{series.name} </td> <td style="text-align: right"><b>{point.y: .0f}</b> ', 
       txt["millionsCHF", lang] , '</td></tr>')
   )
   a$legend(
